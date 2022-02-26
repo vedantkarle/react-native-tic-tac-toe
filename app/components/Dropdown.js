@@ -15,7 +15,7 @@ import DropdownPicker from "./DropdownPicker";
 const Dropdown = () => {
 	const [isModalVisible, setIsModalVisible] = useState(false);
 
-	const { option, setOption } = useContext(Context);
+	const { gameMode, setGameMode, setPlayer2 } = useContext(Context);
 
 	return (
 		<>
@@ -23,19 +23,17 @@ const Dropdown = () => {
 				style={styles.inputContainer}
 				onPress={() => setIsModalVisible(true)}>
 				<View style={{ flexDirection: "row", alignItems: "center" }}>
-					{option !== "" && (
+					{gameMode !== "" && (
 						<Image
 							source={
-								option === "LOCAL"
+								gameMode === "LOCAL"
 									? require("../../assets/player.png")
 									: require("../../assets/bot-med.png")
 							}
 							style={styles.image}
 						/>
 					)}
-					<Text style={styles.text}>
-						{option === "" ? "Choose Player" : option}
-					</Text>
+					<Text style={styles.text}>{gameMode}</Text>
 				</View>
 
 				<MaterialCommunityIcons
@@ -50,7 +48,8 @@ const Dropdown = () => {
 				onRequestClose={() => setIsModalVisible(false)}>
 				<DropdownPicker
 					setIsModalVisible={setIsModalVisible}
-					setOption={setOption}
+					setGameMode={setGameMode}
+					setPlayer2={setPlayer2}
 				/>
 			</Modal>
 		</>
@@ -63,6 +62,7 @@ const styles = StyleSheet.create({
 	inputContainer: {
 		height: 55,
 		width: "80%",
+		marginTop: 15,
 		backgroundColor: "transparent",
 		flexDirection: "row",
 		paddingHorizontal: 15,

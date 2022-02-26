@@ -10,18 +10,22 @@ import {
 } from "react-native";
 import COLORS from "../colors";
 
-const OPTIONS = ["LOCAL", "BOT - MEDIUM", "BOT - HARD"];
+const OPTIONS = ["LOCAL", "BOT-MEDIUM", "BOT-HARD"];
 const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
 
-const DropdownPicker = ({ setIsModalVisible, setOption }) => {
+const DropdownPicker = ({ setIsModalVisible, setGameMode, setPlayer2 }) => {
 	const option = OPTIONS.map((option, i) => {
 		return (
 			<TouchableOpacity
 				style={styles.option}
 				key={i}
 				onPress={() => {
-					setOption(option);
+					setGameMode(option);
+					{
+						(option === "BOT-MEDIUM" || option === "BOT-HARD") &&
+							setPlayer2(option);
+					}
 					setIsModalVisible(false);
 				}}>
 				<Image

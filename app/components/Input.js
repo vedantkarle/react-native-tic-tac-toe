@@ -6,7 +6,7 @@ import COLORS from "../colors";
 const Input = ({ label, iconName, error, onFocus = () => {}, ...props }) => {
 	const [isFocused, setIsFocused] = React.useState(false);
 	return (
-		<View style={{ marginBottom: 20 }}>
+		<View>
 			<Text style={style.label}>{label}</Text>
 			<View
 				style={[
@@ -49,11 +49,6 @@ const Input = ({ label, iconName, error, onFocus = () => {}, ...props }) => {
 };
 
 const style = StyleSheet.create({
-	label: {
-		marginVertical: 5,
-		fontSize: 14,
-		color: COLORS.grey,
-	},
 	inputContainer: {
 		height: 55,
 		width: "80%",

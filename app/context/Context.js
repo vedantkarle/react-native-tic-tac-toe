@@ -5,8 +5,8 @@ const Context = createContext({
 	setPlayer1: () => {},
 	player2: "",
 	setPlayer2: () => {},
-	option: "",
-	setOption: () => {},
+	gameMode: "",
+	setGameMode: () => {},
 });
 
 export default Context;

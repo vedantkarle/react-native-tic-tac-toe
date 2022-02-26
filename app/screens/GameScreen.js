@@ -1,13 +1,17 @@
-import { useEffect, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import { useContext, useEffect, useState } from "react";
 import {
 	Alert,
+	Image,
 	ImageBackground,
 	Pressable,
 	StyleSheet,
 	Text,
+	TouchableOpacity,
 	View,
 } from "react-native";
 import Cross from "../components/Cross";
+import Context from "../context/Context";
 
 const copyArray = original => {
 	const copy = JSON.parse(JSON.stringify(original));
@@ -20,7 +24,16 @@ export default function GameScreen() {
 		["", "", ""],
 		["", "", ""],
 	]);
-	const [currentPlayer, setCurrentPlayer] = useState("x");
+
+	const { gameMode, setGameMode, player1, player2, setPlayer1, setPlayer2 } =
+		useContext(Context);
+
+	const navigation = useNavigation();
+
+	const [currentPlayer, setCurrentPlayer] = useState({
+		sym: "x",
+		name: player1,
+	});
 
 	const handlePress = (row, col) => {
 		if (map[row][col] !== "") {
@@ -29,11 +42,15 @@ export default function GameScreen() {
 
 		setMap(prev => {
 			const updatedMap = [...prev];
-			updatedMap[row][col] = currentPlayer;
+			updatedMap[row][col] = currentPlayer?.sym;
 			return updatedMap;
 		});
 
-		setCurrentPlayer(currentPlayer === "x" ? "o" : "x");
+		setCurrentPlayer(
+			currentPlayer?.sym === "x"
+				? { sym: "o", name: player2 }
+				: { sym: "x", name: player1 },
+		);
 	};
 
 	const getWinner = winnerMap => {
@@ -126,7 +143,7 @@ export default function GameScreen() {
 			["", "", ""],
 			["", "", ""],
 		]);
-		setCurrentPlayer("x");
+		setCurrentPlayer({ sym: "x", name: player1 });
 	};
 
 	const botTurn = () => {
@@ -142,28 +159,30 @@ export default function GameScreen() {
 
 		let chosenOption;
 
-		//Attack
-		possiblePositions.forEach(possiblePosition => {
-			const mapCopy = copyArray(map);
-			mapCopy[possiblePosition.row][possiblePosition.col] = "o";
-
-			const winner = getWinner(mapCopy);
-			if (winner === "o") {
-				chosenOption = possiblePosition;
-			}
-		});
-
-		if (!chosenOption) {
-			//Defend
+		if (gameMode === "BOT-HARD") {
+			//Attack
 			possiblePositions.forEach(possiblePosition => {
 				const mapCopy = copyArray(map);
-				mapCopy[possiblePosition.row][possiblePosition.col] = "x";
+				mapCopy[possiblePosition.row][possiblePosition.col] = "o";
 
 				const winner = getWinner(mapCopy);
-				if (winner === "x") {
+				if (winner === "o") {
 					chosenOption = possiblePosition;
 				}
 			});
+
+			if (!chosenOption) {
+				//Defend
+				possiblePositions.forEach(possiblePosition => {
+					const mapCopy = copyArray(map);
+					mapCopy[possiblePosition.row][possiblePosition.col] = "x";
+
+					const winner = getWinner(mapCopy);
+					if (winner === "x") {
+						chosenOption = possiblePosition;
+					}
+				});
+			}
 		}
 
 		if (!chosenOption) {
@@ -176,11 +195,18 @@ export default function GameScreen() {
 		}
 	};
 
+	const goHome = () => {
+		setPlayer1("");
+		setPlayer2("");
+		setGameMode("LOCAL");
+		navigation.navigate("Start");
+	};
+
 	useEffect(() => {
-		if (currentPlayer === "o") {
+		if (currentPlayer?.sym === "o" && gameMode !== "LOCAL") {
 			botTurn();
 		}
-	}, [currentPlayer]);
+	}, [currentPlayer.sym, gameMode]);
 
 	useEffect(() => {
 		const winner = getWinner(map);
@@ -204,7 +230,8 @@ export default function GameScreen() {
 						position: "absolute",
 						top: 50,
 					}}>
-					Current Turn : {currentPlayer.toUpperCase()}
+					Current Turn : ({currentPlayer.name}) -
+					{currentPlayer?.sym.toUpperCase()}
 				</Text>
 				<View style={styles.map}>
 					{map.map((row, rowIndex) => {
@@ -228,6 +255,23 @@ export default function GameScreen() {
 					{/*
 					 */}
 				</View>
+
+				<View style={styles.mode}>
+					<Image
+						style={{ height: 30, width: 30, marginRight: 10 }}
+						source={
+							gameMode === "LOCAL"
+								? require("../../assets/player.png")
+								: require("../../assets/bot-med.png")
+						}
+					/>
+					<Text style={styles.modeText}>{gameMode}</Text>
+				</View>
+				<TouchableOpacity
+					style={{ position: "absolute", bottom: 20 }}
+					onPress={goHome}>
+					<Text style={{ color: "#fff" }}>Go Home</Text>
+				</TouchableOpacity>
 			</ImageBackground>
 		</View>
 	);
@@ -269,5 +313,18 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		margin: 10,
+	},
+	mode: {
+		position: "absolute",
+		bottom: 50,
+		flexDirection: "row",
+		alignItems: "center",
+		backgroundColor: "#4F5686",
+		margin: 10,
+		padding: 10,
+	},
+	modeText: {
+		color: "#fff",
+		fontSize: 20,
 	},
 });
